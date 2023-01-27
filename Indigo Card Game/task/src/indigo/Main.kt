@@ -6,11 +6,7 @@ enum class Suits(val symbol: String) {
     SPADES("♠"),
     HEARD("♥"),
     DIAMONDS("♦"),
-    CLUBS("♣");
-
-    companion object {
-        override fun toString() = values().joinToString(" ") { it.symbol }
-    }
+    CLUBS("♣")
 }
 
 enum class Ranks(val symbol: String) {
@@ -26,11 +22,7 @@ enum class Ranks(val symbol: String) {
     TEN("10"),
     JACK("J"),
     QUEEN("Q"),
-    KING("K");
-
-    companion object {
-        override fun toString() = values().joinToString(" ") { it.symbol }
-    }
+    KING("K")
 }
 
 class Card(val rank: Ranks, val suit: Suits) {
@@ -39,10 +31,11 @@ class Card(val rank: Ranks, val suit: Suits) {
 
 fun main() {
     chooseAnAction()
-
 }
 
 fun chooseAnAction() {
+    // Test deck
+//    testDeckPrint()
     println("Choose an action (reset, shuffle, get, exit):")
     when (readln()) {
         "reset" -> reset()
@@ -54,36 +47,36 @@ fun chooseAnAction() {
 }
 
 fun reset() {
+    DECK.clear()
     Suits.values().forEach { suit ->
         Ranks.values().forEach { rank ->
             DECK.add(Card(rank, suit))
         }
     }
     println("Card deck is reset.")
-    // Test deck
-    testDeckPrint()
     chooseAnAction()
 }
 
 fun shuffle() {
     DECK.shuffle()
     println("Card deck is shuffled.")
-    // Test deck
-    testDeckPrint()
     chooseAnAction()
 }
 
 fun get() {
     println("Number of cards:")
-    val numberOfCards = readln().toInt()
-
-    if (numberOfCards <= DECK.size) {
-        val removedCard = DECK.drop(numberOfCards)
-        println(DECK.filter { it !in removedCard }.joinToString(" "))
-        DECK.removeAll { it !in removedCard }
-        testDeckPrint()
-    } else {
-        println("Invalid number of cards.")
+    when (val numberOfCards = readln().toIntOrNull()) {
+        !in 1..52, null -> {
+            println("Invalid number of cards.")
+        }
+        !in 1..DECK.size -> {
+            println("The remaining cards are insufficient to meet the request.")
+        }
+        else -> {
+            val removedCard = DECK.drop(numberOfCards)
+            println(DECK.filter { it !in removedCard }.joinToString(" "))
+            DECK.removeAll { it !in removedCard }
+        }
     }
     chooseAnAction()
 }
@@ -98,7 +91,10 @@ fun bye() {
 }
 
 fun testDeckPrint() {
-    println("<TEST DECK PRINT")
-    DECK.forEach { print("$it ") }
-    println("\nTEST>")
+    println(
+        """>    START TEST DECK PRINT
+        |${DECK.size}
+        |${DECK.joinToString(" ")}
+        |   FINISH TEST<""".trimMargin()
+    )
 }

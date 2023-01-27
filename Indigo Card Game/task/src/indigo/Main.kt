@@ -75,15 +75,16 @@ fun shuffle() {
 
 fun get() {
     println("Number of cards:")
-    val numberOfCards = readln().toIntOrNull()
-    println(
-        when (numberOfCards) {
-            !in 1..52 -> "Invalid number of cards."
-            null -> "Null error"
-            else -> "Error"
-        }
-    )
+    val numberOfCards = readln().toInt()
 
+    if (numberOfCards <= DECK.size) {
+        val removedCard = DECK.drop(numberOfCards)
+        println(DECK.filter { it !in removedCard }.joinToString(" "))
+        DECK.removeAll { it !in removedCard }
+        testDeckPrint()
+    } else {
+        println("Invalid number of cards.")
+    }
     chooseAnAction()
 }
 

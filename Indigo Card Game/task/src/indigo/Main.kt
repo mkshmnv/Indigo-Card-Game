@@ -35,12 +35,12 @@ class Card(val rank: Ranks, val suit: Suits) {
 
 fun main() {
 
-    ChooseAnAction()
+    chooseAnAction()
 
 }
 
-fun ChooseAnAction() {
-    println("Choose an action (reset, shuffle, get, exit):\n")
+fun chooseAnAction() {
+    println("Choose an action (reset, shuffle, get, exit):")
     when (readln()) {
         "reset" -> reset()
         "shuffle" -> shuffle()
@@ -51,7 +51,8 @@ fun ChooseAnAction() {
 }
 
 fun wrongAction() {
-    println("Wrong action")
+    println("Wrong action.")
+    chooseAnAction()
 }
 
 fun bye() {
@@ -59,18 +60,25 @@ fun bye() {
 }
 
 fun reset() {
-    TODO("Reset the deck to the original 52 cards;\n" +
-            "Print the message Card deck is reset.;\n" +
-            "Prompt for new action." +
-            "")
-    ChooseAnAction()
+    val deck = mutableListOf<Card>()
+    Ranks.values().forEach {rank ->
+        Suits.values().forEach { suit ->
+            deck.add(Card(rank, suit))
+        }
+    }
+    // Test deck
+//    deck.forEach { print("$it ") }
+    println("Card deck is reset.\n")
+
+
+    chooseAnAction()
 }
 
 fun shuffle() {
     TODO("Change the order of the remaining cards in the deck;\n" +
             "Print the message Card deck is shuffled.;\n" +
             "Prompt for new action.")
-    ChooseAnAction()
+    chooseAnAction()
 }
 
 fun get() {
@@ -78,5 +86,5 @@ fun get() {
             "Users should input a number between 1 and 52. Otherwise, for any number outside this range or for any non-number input, print Invalid number of cards. (Example 2);\n" +
             "These cards are to be removed from the top of the deck and printed divided by one space (6♦ 3♦ 8♦ 4♠ 9♦). If the number of cards is larger than the number of the remaining cards in the deck, print The remaining cards are insufficient to meet the request. (Example 3);\n" +
             "Prompt for new action.")
-    ChooseAnAction()
+    chooseAnAction()
 }

@@ -1,5 +1,7 @@
 package indigo
 
+val DECK = mutableListOf<Card>()
+
 enum class Suits (val symbol: String) {
     SPADES("♠"),
     HEARD("♥"),
@@ -34,7 +36,6 @@ class Card(val rank: Ranks, val suit: Suits) {
 }
 
 fun main() {
-
     chooseAnAction()
 
 }
@@ -50,34 +51,23 @@ fun chooseAnAction() {
     }
 }
 
-fun wrongAction() {
-    println("Wrong action.")
-    chooseAnAction()
-}
-
-fun bye() {
-    println("Bye")
-}
-
 fun reset() {
-    val deck = mutableListOf<Card>()
-    Ranks.values().forEach {rank ->
-        Suits.values().forEach { suit ->
-            deck.add(Card(rank, suit))
+    Suits.values().forEach {suit ->
+        Ranks.values().forEach { rank ->
+            DECK.add(Card(rank, suit))
         }
     }
+    println("Card deck is reset.")
     // Test deck
-//    deck.forEach { print("$it ") }
-    println("Card deck is reset.\n")
-
-
+    testDeckPrint()
     chooseAnAction()
 }
 
 fun shuffle() {
-    TODO("Change the order of the remaining cards in the deck;\n" +
-            "Print the message Card deck is shuffled.;\n" +
-            "Prompt for new action.")
+    DECK.shuffle()
+    println("Card deck is shuffled.")
+    // Test deck
+    testDeckPrint()
     chooseAnAction()
 }
 
@@ -87,4 +77,17 @@ fun get() {
             "These cards are to be removed from the top of the deck and printed divided by one space (6♦ 3♦ 8♦ 4♠ 9♦). If the number of cards is larger than the number of the remaining cards in the deck, print The remaining cards are insufficient to meet the request. (Example 3);\n" +
             "Prompt for new action.")
     chooseAnAction()
+}
+
+fun wrongAction() {
+    println("Wrong action.")
+    chooseAnAction()
+}
+fun bye() {
+    println("Bye")
+}
+fun testDeckPrint() {
+    println("<TEST DECK PRINT")
+    DECK.forEach { print("$it ") }
+    println("\nTEST>")
 }

@@ -28,14 +28,14 @@ enum class Ranks(val symbol: String) {
     KING("K")
 }
 
-enum class Decks() {
-    DECK,
-    TABLE,
-    PLAYER,
-    COMPUTER
+enum class Decks(var deck: MutableList<Card>) {
+    DECK(mutableListOf()),
+    TABLE(mutableListOf()),
+    PLAYER(mutableListOf()),
+    COMPUTER(mutableListOf())
 }
 
-enum class Turn() {
+enum class Turn {
     PLAYER,
     COMPUTER
 }
@@ -46,45 +46,44 @@ class Card(val rank: Ranks, val suit: Suits) {
 
 
 fun main() {
-    val deck = createDeck()
-    val table = initialTable(deck)
-    val playerHand = mutableListOf<Card>()
-    val computerHand = mutableListOf<Card>()
-
-
-
-
-
-//    startGame()
+    startGame()
 }
 
-fun startGame(): List<Pair<Decks, MutableList<Card>>> {
-    var whoseTurn = if (firstTurn()) Turn.PLAYER else Turn.COMPUTER
-
-    val allDecks = mutableListOf<Pair<Decks, MutableList<Card>>>()
-
-    val deck = createDeck()
-    val table = initialTable(deck)
-
-
-    allDecks.add(Decks.DECK to deck)
-    deck.drop(4)
-    allDecks.add(Decks.TABLE to table)
-    allDecks.add(Decks.PLAYER to createDeck())
-    allDecks.add(Decks.DECK to playerHand())
-    return listOf(Decks.DECK to computerHand())
+fun startGame() {
+    println("Indigo Card Game\nPlay first?")
+    firstTurn()
+    createDeck()
 }
 
-fun initialTable(deck: MutableList<Card>): MutableList<Card> {
-    val table = deck.subList(0, 4)
+fun firstTurn() {
+    when (readln()) {
+        "yes" -> Turn.PLAYER
+        "no" -> Turn.COMPUTER
+        else -> {
+            println("Incorrect choice, please enter \"yes\" or \"no\"")
+            firstTurn()
+        }
+    }
+}
+
+fun createDeck() {
+    Suits.values().forEach { suit ->
+        Ranks.values().forEach { rank ->
+            Decks.DECK.deck.add(Card(rank, suit))
+        }
+    }
+    Decks.DECK.deck.shuffle()
+}
+
+fun initialTable(): MutableList<Card> {
+    Decks.TABLE.deck = Decks.DECK.deck.subList(0, 4)
+    Decks.DECK.deck.drop(4)
+
     println("Initial cards on the table: ${table.joinToString(" ")}")
+
     return table
 }
 
-fun firstTurn(): Boolean {
-    println("Indigo Card Game\nPlay first?")
-    return readln() == "yes"
-}
 
 fun chooseAnAction() {
     // Test deck
@@ -99,16 +98,7 @@ fun chooseAnAction() {
     }
 }
 
-fun createDeck(): MutableList<Card> {
-    val deck = mutableListOf<Card>()
-    Suits.values().forEach { suit ->
-        Ranks.values().forEach { rank ->
-            deck.add(Card(rank, suit))
-        }
-    }
-    deck.shuffle()
-    return deck
-}
+
 
 fun shuffle() {
     DECK.shuffle()

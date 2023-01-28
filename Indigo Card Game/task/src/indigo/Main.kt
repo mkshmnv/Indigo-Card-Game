@@ -1,9 +1,5 @@
 package indigo
 
-val DECK = mutableListOf<Card>()
-val TABLE = mutableListOf<Card>()
-val PLAYER = mutableListOf<Card>()
-val COMPUTER = mutableListOf<Card>()
 
 enum class Suits(val symbol: String) {
     SPADES("♠"),
@@ -47,6 +43,14 @@ class Card(val rank: Ranks, val suit: Suits) {
 
 fun main() {
     start()
+    game()
+}
+
+fun game() {
+    while (Decks.DECK.deck.size > 0) {
+        println("${Decks.TABLE.deck.size} cards on the table, and the top card is ${Decks.TABLE.deck.first()}")
+
+    }
 }
 
 fun start() {
@@ -82,60 +86,8 @@ fun initialTable() {
     println("Initial cards on the table: ${Decks.TABLE.deck.joinToString(" ")}")
 }
 
-
-fun chooseAnAction() {
-    // Test deck
-//    testDeckPrint()
-    println("Choose an action (reset, shuffle, get, exit):")
-    when (readln()) {
-        "reset" -> createDeck()
-        "shuffle" -> shuffle()
-        "get" -> get()
-        "exit" -> bye()
-        else -> wrongAction()
-    }
+fun exit() {
+    println("Game Over")
 }
 
 
-
-fun shuffle() {
-    DECK.shuffle()
-    println("Card deck is shuffled.")
-    chooseAnAction()
-}
-
-fun get() {
-    println("Number of cards:")
-    when (val numberOfCards = readln().toIntOrNull()) {
-        !in 1..52, null -> {
-            println("Invalid number of cards.")
-        }
-        !in 1..DECK.size -> {
-            println("The remaining cards are insufficient to meet the request.")
-        }
-        else -> {
-            val removedCard = DECK.drop(numberOfCards)
-            println(DECK.filter { it !in removedCard }.joinToString(" "))
-            DECK.removeAll { it !in removedCard }
-        }
-    }
-    chooseAnAction()
-}
-
-fun wrongAction() {
-    println("Wrong action.")
-    chooseAnAction()
-}
-
-fun bye() {
-    println("Bye")
-}
-
-fun testDeckPrint() {
-    println(
-        """>    START TEST DECK PRINT
-        |${DECK.size}
-        |${DECK.joinToString(" ")}
-        |   FINISH TEST<""".trimMargin()
-    )
-}

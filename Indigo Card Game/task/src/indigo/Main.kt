@@ -27,13 +27,13 @@ enum class Ranks(val symbol: String) {
 enum class Decks(var deck: MutableList<Card>) {
     DECK(mutableListOf()),
     TABLE(mutableListOf()),
-    PLAYER(mutableListOf()),
+    USER(mutableListOf()),
     COMPUTER(mutableListOf())
 }
 
-enum class Turn {
-    PLAYER,
-    COMPUTER
+enum class Turn(var turn: Boolean) {
+    USER(false),
+    COMPUTER(false)
 }
 
 class Card(val rank: Ranks, val suit: Suits) {
@@ -46,24 +46,40 @@ fun main() {
     game()
 }
 
-fun game() {
+private fun game() {
     while (Decks.DECK.deck.size > 0) {
         println("${Decks.TABLE.deck.size} cards on the table, and the top card is ${Decks.TABLE.deck.first()}")
 
+        if (Turn.USER.turn) {
+            putCard(Decks.USER)
+        } else if ((Turn.COMPUTER.turn)) {
+            putCard(Decks.COMPUTER)
+        }
+        printAllDecks()
+        Decks.DECK.deck.clear()
     }
 }
 
-fun start() {
+private fun start() {
     println("Indigo Card Game\nPlay first?")
     firstTurn()
+//    whoseTurn() // This test!
+
+//    Let's get(create) a deck of cards
     createDeck()
+
+//    Deal cards on table
     initialTable()
+
+//    Hand out cards to players
+    distrСards()
+//    printAllDecks() // This test!
 }
 
-fun firstTurn() {
+private fun firstTurn() {
     when (readln()) {
-        "yes" -> Turn.PLAYER
-        "no" -> Turn.COMPUTER
+        "yes" -> Turn.USER.turn = true
+        "no" -> Turn.COMPUTER.turn = true
         else -> {
             println("Incorrect choice, please enter \"yes\" or \"no\"")
             firstTurn()
@@ -71,7 +87,7 @@ fun firstTurn() {
     }
 }
 
-fun createDeck() {
+private fun createDeck() {
     Suits.values().forEach { suit ->
         Ranks.values().forEach { rank ->
             Decks.DECK.deck.add(Card(rank, suit))
@@ -80,14 +96,69 @@ fun createDeck() {
     Decks.DECK.deck.shuffle()
 }
 
-fun initialTable() {
-    Decks.TABLE.deck = Decks.DECK.deck.subList(0, 4)
-    Decks.DECK.deck.drop(4)
+private fun initialTable() {
+    Decks.TABLE.deck = Decks.DECK.deck.subList(0, 4).asReversed()
     println("Initial cards on the table: ${Decks.TABLE.deck.joinToString(" ")}")
+
+    // crutch for deleting a value  -  fix this!
+    val temp = Decks.DECK.deck.filter { it !in Decks.TABLE.deck }.toMutableList()
+    Decks.DECK.deck = temp
+}
+
+private fun distrСards() {
+    Decks.DECK.deck.subList(0, 13).forEachIndexed { index, card ->
+        if (index % 2 == 0) {
+            Decks.COMPUTER.deck.add(card)
+        } else {
+            Decks.USER.deck.add(card)
+        }
+    }
+    Decks.DECK.deck.removeAll(Decks.COMPUTER.deck)
+    Decks.DECK.deck.removeAll(Decks.USER.deck)
+}
+
+private fun cardsInHand() {
+    var number = 0
+    println("Cards in hand: ")
+    Decks.USER.deck.forEach {
+        number += 1
+        print("$number)$it ")
+    }
+    println("")
+}
+
+private fun putCard(player: Decks) {
+    if (player == Decks.USER) {
+        cardsInHand()
+        println("\nChoose a card to play (1-${Decks.USER.deck.size}):")
+
+        // fix out of range
+        val card = Decks.USER.deck[readln().toInt() - 1]
+        Decks.TABLE.deck.add(0, card)
+        player.deck.remove(card)
+    } else if (player == Decks.COMPUTER) {
+
+    }
+
 }
 
 fun exit() {
     println("Game Over")
+}
+
+
+// Tests __________________________________________________________
+private fun whoseTurn() {
+    Turn.values().forEach { println("${it.name} - ${it.turn} ") }
+}
+
+private fun printAllDecks() {
+    println(
+        "deck -> ${Decks.DECK.deck.joinToString(" ")}\n" +
+                "table -> ${Decks.TABLE.deck.joinToString(" ")}\n" +
+                "player -> ${Decks.USER.deck.joinToString(" ")}\n" +
+                "computer -> ${Decks.COMPUTER.deck.joinToString(" ")}\n"
+    )
 }
 
 

@@ -72,7 +72,7 @@ private fun start() {
     initialTable()
 
 //    Hand out cards to players
-    distrСards()
+    dealCards()
 //    printAllDecks() // This test!
 }
 
@@ -105,7 +105,7 @@ private fun initialTable() {
     Decks.DECK.deck = temp
 }
 
-private fun distrСards() {
+private fun dealCards() {
     Decks.DECK.deck.subList(0, 13).forEachIndexed { index, card ->
         if (index % 2 == 0) {
             Decks.COMPUTER.deck.add(card)
@@ -119,7 +119,7 @@ private fun distrСards() {
 
 private fun cardsInHand() {
     var number = 0
-    println("Cards in hand: ")
+    print("Cards in hand: ")
     Decks.USER.deck.forEach {
         number += 1
         print("$number)$it ")
@@ -154,10 +154,12 @@ private fun whoseTurn() {
 
 private fun printAllDecks() {
     println(
-        "deck -> ${Decks.DECK.deck.joinToString(" ")}\n" +
-                "table -> ${Decks.TABLE.deck.joinToString(" ")}\n" +
-                "player -> ${Decks.USER.deck.joinToString(" ")}\n" +
-                "computer -> ${Decks.COMPUTER.deck.joinToString(" ")}\n"
+        """
+        deck -> ${Decks.DECK.deck.joinToString(" ")}
+        table -> ${Decks.TABLE.deck.joinToString(" ")}
+        user -> ${Decks.USER.deck.joinToString(" ")}
+        computer -> ${Decks.COMPUTER.deck.joinToString(" ")}
+        """.trimIndent()
     )
 }
 

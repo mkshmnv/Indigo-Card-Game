@@ -1,6 +1,9 @@
 package indigo
 
 val DECK = mutableListOf<Card>()
+val TABLE = mutableListOf<Card>()
+val PLAYER = mutableListOf<Card>()
+val COMPUTER = mutableListOf<Card>()
 
 enum class Suits(val symbol: String) {
     SPADES("♠"),
@@ -25,13 +28,62 @@ enum class Ranks(val symbol: String) {
     KING("K")
 }
 
+enum class Decks() {
+    DECK,
+    TABLE,
+    PLAYER,
+    COMPUTER
+}
+
+enum class Turn() {
+    PLAYER,
+    COMPUTER
+}
+
 class Card(val rank: Ranks, val suit: Suits) {
     override fun toString() = "${rank.symbol}${suit.symbol}"
 }
 
 
 fun main() {
-    chooseAnAction()
+    val deck = createDeck()
+    val table = initialTable(deck)
+    val playerHand = mutableListOf<Card>()
+    val computerHand = mutableListOf<Card>()
+
+
+
+
+
+//    startGame()
+}
+
+fun startGame(): List<Pair<Decks, MutableList<Card>>> {
+    var whoseTurn = if (firstTurn()) Turn.PLAYER else Turn.COMPUTER
+
+    val allDecks = mutableListOf<Pair<Decks, MutableList<Card>>>()
+
+    val deck = createDeck()
+    val table = initialTable(deck)
+
+
+    allDecks.add(Decks.DECK to deck)
+    deck.drop(4)
+    allDecks.add(Decks.TABLE to table)
+    allDecks.add(Decks.PLAYER to createDeck())
+    allDecks.add(Decks.DECK to playerHand())
+    return listOf(Decks.DECK to computerHand())
+}
+
+fun initialTable(deck: MutableList<Card>): MutableList<Card> {
+    val table = deck.subList(0, 4)
+    println("Initial cards on the table: ${table.joinToString(" ")}")
+    return table
+}
+
+fun firstTurn(): Boolean {
+    println("Indigo Card Game\nPlay first?")
+    return readln() == "yes"
 }
 
 fun chooseAnAction() {
@@ -39,7 +91,7 @@ fun chooseAnAction() {
 //    testDeckPrint()
     println("Choose an action (reset, shuffle, get, exit):")
     when (readln()) {
-        "reset" -> reset()
+        "reset" -> createDeck()
         "shuffle" -> shuffle()
         "get" -> get()
         "exit" -> bye()
@@ -47,15 +99,15 @@ fun chooseAnAction() {
     }
 }
 
-fun reset() {
-    DECK.clear()
+fun createDeck(): MutableList<Card> {
+    val deck = mutableListOf<Card>()
     Suits.values().forEach { suit ->
         Ranks.values().forEach { rank ->
-            DECK.add(Card(rank, suit))
+            deck.add(Card(rank, suit))
         }
     }
-    println("Card deck is reset.")
-    chooseAnAction()
+    deck.shuffle()
+    return deck
 }
 
 fun shuffle() {

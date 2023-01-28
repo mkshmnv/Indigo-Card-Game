@@ -46,13 +46,14 @@ class Card(val rank: Ranks, val suit: Suits) {
 
 
 fun main() {
-    startGame()
+    start()
 }
 
-fun startGame() {
+fun start() {
     println("Indigo Card Game\nPlay first?")
     firstTurn()
     createDeck()
+    initialTable()
 }
 
 fun firstTurn() {
@@ -75,13 +76,10 @@ fun createDeck() {
     Decks.DECK.deck.shuffle()
 }
 
-fun initialTable(): MutableList<Card> {
+fun initialTable() {
     Decks.TABLE.deck = Decks.DECK.deck.subList(0, 4)
     Decks.DECK.deck.drop(4)
-
-    println("Initial cards on the table: ${table.joinToString(" ")}")
-
-    return table
+    println("Initial cards on the table: ${Decks.TABLE.deck.joinToString(" ")}")
 }
 
 

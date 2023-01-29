@@ -1,6 +1,5 @@
 package indigo
 
-
 enum class Suits(val symbol: String) {
     SPADES("♠"),
     HEARD("♥"),
@@ -31,7 +30,7 @@ enum class Decks(var deck: MutableList<Card>) {
     COMPUTER(mutableListOf())
 }
 
-enum class Turn(var turn: Boolean) {
+enum class Move(var turn: Boolean) {
     USER(false),
     COMPUTER(false)
 }
@@ -48,13 +47,9 @@ fun main() {
 
 private fun game() {
     while (Decks.DECK.deck.size > 0) {
-        println("${Decks.TABLE.deck.size} cards on the table, and the top card is ${Decks.TABLE.deck.first()}")
+        println("\n${Decks.TABLE.deck.size} cards on the table, and the top card is ${Decks.TABLE.deck.first()}")
 
-        if (Turn.USER.turn) {
-            putCard(Decks.USER)
-        } else if ((Turn.COMPUTER.turn)) {
-            putCard(Decks.COMPUTER)
-        }
+        if (Move.USER.turn) putCard(Move.USER) else putCard(Move.COMPUTER)
         printAllDecks()
         Decks.DECK.deck.clear()
     }
@@ -78,8 +73,8 @@ private fun start() {
 
 private fun firstTurn() {
     when (readln()) {
-        "yes" -> Turn.USER.turn = true
-        "no" -> Turn.COMPUTER.turn = true
+        "yes" -> Move.USER.turn = true
+        "no" -> Move.COMPUTER.turn = true
         else -> {
             println("Incorrect choice, please enter \"yes\" or \"no\"")
             firstTurn()
@@ -127,20 +122,49 @@ private fun cardsInHand() {
     println("")
 }
 
-private fun putCard(player: Decks) {
-    if (player == Decks.USER) {
-        cardsInHand()
-        println("\nChoose a card to play (1-${Decks.USER.deck.size}):")
+private fun putCard(player: Move) {
+    val card: Card
+    val sizeDeck = Decks.USER.deck.size
 
-        // fix out of range
-        val card = Decks.USER.deck[readln().toInt() - 1]
-        Decks.TABLE.deck.add(0, card)
-        player.deck.remove(card)
-    } else if (player == Decks.COMPUTER) {
-
+    fun switchPlayer() {
+        Move.USER.turn = true
+        Move.COMPUTER.turn = true
+        player.turn = false
     }
 
+    when (player) {
+        // process when user move
+        Move.USER -> {
+            // output card in hand user
+            cardsInHand()
+            println("\nChoose a card to play (1-$sizeDeck):")
+
+            // process received choice
+            when (val choice = readln()) {
+                in List(sizeDeck) { (it + 1).toString() } -> {
+                    card = Decks.USER.deck[choice.toInt() - 1]
+                    Decks.TABLE.deck.add(0, card)
+                    Decks.USER.deck.remove(card)
+                    switchPlayer()
+                }
+                "exit" -> exit()
+                else -> {
+                    println("Incorrect number card")
+                    putCard(player)
+                }
+            }
+        }
+        // process when computer move
+        Move.COMPUTER -> {
+            card = Decks.COMPUTER.deck.random()
+            println("Computer plays $card")
+            Decks.TABLE.deck.add(0, card)
+            Decks.COMPUTER.deck.remove(card)
+            switchPlayer()
+        }
+    }
 }
+
 
 fun exit() {
     println("Game Over")
@@ -149,7 +173,7 @@ fun exit() {
 
 // Tests __________________________________________________________
 private fun whoseTurn() {
-    Turn.values().forEach { println("${it.name} - ${it.turn} ") }
+    Move.values().forEach { println("${it.name} - ${it.turn} ") }
 }
 
 private fun printAllDecks() {

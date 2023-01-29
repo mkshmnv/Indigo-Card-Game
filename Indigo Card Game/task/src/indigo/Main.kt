@@ -45,16 +45,6 @@ fun main() {
     game()
 }
 
-private fun game() {
-    while (Decks.DECK.deck.size > 0) {
-        println("\n${Decks.TABLE.deck.size} cards on the table, and the top card is ${Decks.TABLE.deck.first()}")
-
-        if (Move.USER.turn) putCard(Move.USER) else putCard(Move.COMPUTER)
-        printAllDecks()
-        Decks.DECK.deck.clear()
-    }
-}
-
 private fun start() {
     println("Indigo Card Game\nPlay first?")
     firstTurn()
@@ -69,6 +59,26 @@ private fun start() {
 //    Hand out cards to players
     dealCards()
 //    printAllDecks() // This test!
+}
+
+private fun game() {
+
+    while (Decks.TABLE.deck.size <= 52) {
+        val table = Decks.TABLE.deck
+
+        println("\n${table.size} cards on the table, and the top card is ${table.last()}")
+
+        if (Decks.USER.deck.isEmpty() || Decks.COMPUTER.deck.isEmpty()) dealCards()
+
+        if (Move.USER.turn) {
+            cardsInHand()
+            putCard(Move.USER)
+        } else {
+            putCard(Move.COMPUTER)
+        }
+        printAllDecks()
+    }
+    println("Game Over")
 }
 
 private fun firstTurn() {
@@ -92,7 +102,7 @@ private fun createDeck() {
 }
 
 private fun initialTable() {
-    Decks.TABLE.deck = Decks.DECK.deck.subList(0, 4).asReversed()
+    Decks.TABLE.deck = Decks.DECK.deck.subList(0, 4)
     println("Initial cards on the table: ${Decks.TABLE.deck.joinToString(" ")}")
 
     // crutch for deleting a value  -  fix this!
@@ -101,6 +111,7 @@ private fun initialTable() {
 }
 
 private fun dealCards() {
+    //TODO() FIX OUT OF RANGE
     Decks.DECK.deck.subList(0, 13).forEachIndexed { index, card ->
         if (index % 2 == 0) {
             Decks.COMPUTER.deck.add(card)
@@ -119,7 +130,6 @@ private fun cardsInHand() {
         number += 1
         print("$number)$it ")
     }
-    println("")
 }
 
 private fun putCard(player: Move) {
@@ -136,29 +146,27 @@ private fun putCard(player: Move) {
         // process when user move
         Move.USER -> {
             // output card in hand user
-            cardsInHand()
-            println("\nChoose a card to play (1-$sizeDeck):")
+            println("Choose a card to play (1-$sizeDeck):")
 
             // process received choice
             when (val choice = readln()) {
                 in List(sizeDeck) { (it + 1).toString() } -> {
                     card = Decks.USER.deck[choice.toInt() - 1]
-                    Decks.TABLE.deck.add(0, card)
+                    Decks.TABLE.deck.add(Decks.TABLE.deck.size, card)
                     Decks.USER.deck.remove(card)
                     switchPlayer()
                 }
                 "exit" -> exit()
                 else -> {
-                    println("Incorrect number card")
                     putCard(player)
                 }
             }
         }
         // process when computer move
         Move.COMPUTER -> {
-            card = Decks.COMPUTER.deck.random()
+            card = Decks.COMPUTER.deck.first()
             println("Computer plays $card")
-            Decks.TABLE.deck.add(0, card)
+            Decks.TABLE.deck.add(Decks.TABLE.deck.size, card)
             Decks.COMPUTER.deck.remove(card)
             switchPlayer()
         }

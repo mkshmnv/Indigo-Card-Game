@@ -146,6 +146,7 @@ private fun putCard(player: Move) {
         // process when user move
         Move.USER -> {
             // output card in hand user
+            // TODO() FIX postponement to next line
             println("Choose a card to play (1-$sizeDeck):")
 
             // process received choice

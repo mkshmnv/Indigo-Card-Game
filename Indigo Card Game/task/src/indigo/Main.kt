@@ -62,13 +62,11 @@ private fun start() {
 }
 
 private fun game() {
-
-    while (Decks.TABLE.deck.size <= 52) {
-        val table = Decks.TABLE.deck
-
+    val table = Decks.TABLE.deck
+    do {
         println("\n${table.size} cards on the table, and the top card is ${table.last()}")
 
-        if (Decks.USER.deck.isEmpty() || Decks.COMPUTER.deck.isEmpty()) dealCards()
+        if (Decks.USER.deck.isEmpty() && Decks.COMPUTER.deck.isEmpty() && Decks.DECK.deck.isNotEmpty()) dealCards()
 
         if (Move.USER.turn) {
             cardsInHand()
@@ -76,9 +74,10 @@ private fun game() {
         } else {
             putCard(Move.COMPUTER)
         }
-        printAllDecks()
-    }
-    println("Game Over")
+//        printAllDecks()
+    } while (Decks.TABLE.deck.size < 52)
+    println("\n${table.size} cards on the table, and the top card is ${table.last()}")
+    exit()
 }
 
 private fun firstTurn() {
@@ -86,6 +85,7 @@ private fun firstTurn() {
         "yes" -> Move.USER.turn = true
         "no" -> Move.COMPUTER.turn = true
         else -> {
+//            TODO() FIX THIS
             println("Incorrect choice, please enter \"yes\" or \"no\"")
             firstTurn()
         }
@@ -111,14 +111,14 @@ private fun initialTable() {
 }
 
 private fun dealCards() {
-    //TODO() FIX OUT OF RANGE
-    Decks.DECK.deck.subList(0, 13).forEachIndexed { index, card ->
+    for (index in 0..11) {
         if (index % 2 == 0) {
-            Decks.COMPUTER.deck.add(card)
+            Decks.COMPUTER.deck.add(Decks.DECK.deck[index])
         } else {
-            Decks.USER.deck.add(card)
+            Decks.USER.deck.add(Decks.DECK.deck[index])
         }
     }
+
     Decks.DECK.deck.removeAll(Decks.COMPUTER.deck)
     Decks.DECK.deck.removeAll(Decks.USER.deck)
 }
@@ -146,8 +146,7 @@ private fun putCard(player: Move) {
         // process when user move
         Move.USER -> {
             // output card in hand user
-            // TODO() FIX postponement to next line
-            println("Choose a card to play (1-$sizeDeck):")
+            println("\nChoose a card to play (1-$sizeDeck):")
 
             // process received choice
             when (val choice = readln()) {
@@ -177,6 +176,7 @@ private fun putCard(player: Move) {
 
 fun exit() {
     println("Game Over")
+//    printAllDecks()
 }
 
 

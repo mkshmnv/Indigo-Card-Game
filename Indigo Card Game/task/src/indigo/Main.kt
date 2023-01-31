@@ -38,14 +38,14 @@ enum class Move(var turn: Boolean) {
     COMPUTER(false)
 }
 
+var toСontinue = true
+
 
 fun main() {
+
     start()
     game()
 }
-
-
-
 
 
 private fun start() {
@@ -89,10 +89,11 @@ private fun start() {
 
 private fun game() {
     val table = Decks.TABLE.deck
-    while (Decks.TABLE.deck.size != 52 && Decks.DECK.deck.size > 0) {
+    while (toСontinue) {
         println("\n${table.size} cards on the table, and the top card is ${table.last()}")
 
-        if (Decks.USER.deck.isEmpty() && Decks.COMPUTER.deck.isEmpty() && Decks.DECK.deck.isNotEmpty()) dealCards()
+//        if (Decks.USER.deck.isEmpty() && Decks.COMPUTER.deck.isEmpty() && Decks.DECK.deck.isNotEmpty()) dealCards()
+        if (Decks.USER.deck.isEmpty() && Decks.COMPUTER.deck.isEmpty()) dealCards()
 
         when {
             Move.USER.turn -> {
@@ -102,11 +103,16 @@ private fun game() {
             }
             Move.COMPUTER.turn -> putCard(Move.COMPUTER)
         }
-
-        printAllDecks()
+        if (
+            Decks.DECK.deck.isEmpty() &&
+            Decks.TABLE.deck.size == 52 &&
+            Decks.USER.deck.isEmpty() &&
+            Decks.COMPUTER.deck.isEmpty()
+        ) exit()
+//        printAllDecks()
     }
-    println("\n${table.size} cards on the table, and the top card is ${table.last()}")
-    exit()
+//    println("\n${table.size} cards on the table, and the top card is ${table.last()}")
+//    exit()
 }
 
 private fun dealCards() {
@@ -117,7 +123,6 @@ private fun dealCards() {
             Decks.USER.deck.add(Decks.DECK.deck[index])
         }
     }
-
     Decks.DECK.deck.removeAll(Decks.COMPUTER.deck)
     Decks.DECK.deck.removeAll(Decks.USER.deck)
 }
@@ -148,7 +153,10 @@ private fun putCard(player: Move) {
                     card = Decks.USER.deck[choice.toInt() - 1]
                     put(Decks.USER, card)
                 }
-                "exit" -> exit()
+                "exit" -> {
+                    toСontinue = false
+                    println("Game Over")
+                }
                 else -> putCard(player)
             }
         }
@@ -163,6 +171,8 @@ private fun putCard(player: Move) {
 
 
 fun exit() {
+    toСontinue = false
+    println("\n${Decks.TABLE.deck.size} cards on the table, and the top card is ${Decks.TABLE.deck.last()}")
     println("Game Over")
 }
 

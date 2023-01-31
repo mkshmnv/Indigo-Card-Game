@@ -30,13 +30,12 @@ enum class Decks(var deck: MutableList<Card>) {
     COMPUTER(mutableListOf())
 }
 
+class Card(val rank: Ranks, val suit: Suits) {
+    override fun toString() = "${rank.symbol}${suit.symbol}"
+}
 enum class Move(var turn: Boolean) {
     USER(false),
     COMPUTER(false)
-}
-
-class Card(val rank: Ranks, val suit: Suits) {
-    override fun toString() = "${rank.symbol}${suit.symbol}"
 }
 
 
@@ -45,15 +44,42 @@ fun main() {
     game()
 }
 
+
+
+
+
 private fun start() {
-    println("Indigo Card Game\nPlay first?")
+    println("Indigo Card Game")
+
+    fun firstTurn() {
+        println("Play first?")
+        when (readln().lowercase()) {
+            "yes" -> Move.USER.turn = true
+            "no" -> Move.COMPUTER.turn = true
+            else -> firstTurn()
+        }
+    }
+
+    fun initialTable() {
+        Suits.values().forEach { suit ->
+            Ranks.values().forEach { rank ->
+                Decks.DECK.deck.add(Card(rank, suit))
+            }
+        }
+        Decks.DECK.deck.shuffle()
+
+        Decks.TABLE.deck = Decks.DECK.deck.subList(0, 4)
+        println("Initial cards on the table: ${Decks.TABLE.deck.joinToString(" ")}")
+
+        // TODO() FIX crutch for deleting a value  -  fix this!
+        val temp = Decks.DECK.deck.filter { it !in Decks.TABLE.deck }.toMutableList()
+        Decks.DECK.deck = temp
+    }
+
+//    Whois first
     firstTurn()
-//    whoseTurn() // This test!
 
-//    Let's get(create) a deck of cards
-    createDeck()
-
-//    Deal cards on table
+//    Let's get(create) a deck and deal cards on table
     initialTable()
 
 //    Hand out cards to players
@@ -62,9 +88,15 @@ private fun start() {
 }
 
 private fun game() {
+    var continueGame = true
     val table = Decks.TABLE.deck
-    do {
+    while (continueGame) {
         println("\n${table.size} cards on the table, and the top card is ${table.last()}")
+
+        if (Decks.TABLE.deck.size == 52) {
+            continueGame = exit()
+            break
+        }
 
         if (Decks.USER.deck.isEmpty() && Decks.COMPUTER.deck.isEmpty() && Decks.DECK.deck.isNotEmpty()) dealCards()
 
@@ -75,40 +107,12 @@ private fun game() {
             putCard(Move.COMPUTER)
         }
 //        printAllDecks()
-    } while (Decks.TABLE.deck.size < 52)
+    }
     println("\n${table.size} cards on the table, and the top card is ${table.last()}")
     exit()
 }
 
-private fun firstTurn() {
-    when (readln()) {
-        "yes" -> Move.USER.turn = true
-        "no" -> Move.COMPUTER.turn = true
-        else -> {
-//            TODO() FIX THIS
-            println("Incorrect choice, please enter \"yes\" or \"no\"")
-            firstTurn()
-        }
-    }
-}
 
-private fun createDeck() {
-    Suits.values().forEach { suit ->
-        Ranks.values().forEach { rank ->
-            Decks.DECK.deck.add(Card(rank, suit))
-        }
-    }
-    Decks.DECK.deck.shuffle()
-}
-
-private fun initialTable() {
-    Decks.TABLE.deck = Decks.DECK.deck.subList(0, 4)
-    println("Initial cards on the table: ${Decks.TABLE.deck.joinToString(" ")}")
-
-    // crutch for deleting a value  -  fix this!
-    val temp = Decks.DECK.deck.filter { it !in Decks.TABLE.deck }.toMutableList()
-    Decks.DECK.deck = temp
-}
 
 private fun dealCards() {
     for (index in 0..11) {
@@ -132,7 +136,7 @@ private fun cardsInHand() {
     }
 }
 
-private fun putCard(player: Move) {
+private fun putCard(player: Move): Boolean {
     val card: Card
     val sizeDeck = Decks.USER.deck.size
 
@@ -156,7 +160,7 @@ private fun putCard(player: Move) {
                     Decks.USER.deck.remove(card)
                     switchPlayer()
                 }
-                "exit" -> exit()
+                "exit" -> return exit()
                 else -> {
                     putCard(player)
                 }
@@ -171,12 +175,13 @@ private fun putCard(player: Move) {
             switchPlayer()
         }
     }
+    return true
 }
 
 
-fun exit() {
+fun exit(): Boolean {
     println("Game Over")
-//    printAllDecks()
+    return false
 }
 
 

@@ -34,9 +34,9 @@ enum class Decks(var deck: MutableList<Card>) {
     COMPUTER(mutableListOf())
 }
 
-enum class Move(var turn: Boolean) {
-    USER(false),
-    COMPUTER(false)
+enum class Players(var turn: Boolean, var win: Boolean) {
+    USER(false, false),
+    COMPUTER(false, false)
 }
 
 fun main() {
@@ -51,11 +51,11 @@ private fun startGame() {
     println("Indigo Card Game")
 
 //    Ask questions until we find out who goes first
-    while (!Move.USER.turn && !Move.COMPUTER.turn) {
+    while (!Players.USER.turn && !Players.COMPUTER.turn) {
         println("Play first?")
         when (readln().lowercase()) {
-            "yes" -> Move.USER.turn = true
-            "no" -> Move.COMPUTER.turn = true
+            "yes" -> Players.USER.turn = true
+            "no" -> Players.COMPUTER.turn = true
         }
     }
 
@@ -83,19 +83,19 @@ private fun game() {
         println("\n${Decks.TABLE.deck.size} cards on the table, and the top card is ${Decks.TABLE.deck.last()}")
 
 //    Game continues while players have a turn
-    while (Move.USER.turn || Move.COMPUTER.turn) {
+    while (Players.USER.turn || Players.COMPUTER.turn) {
         messageText()
 
         if (Decks.USER.deck.isEmpty() && Decks.COMPUTER.deck.isEmpty()) dealCards()
 
         when {
-            Move.USER.turn -> {
+            Players.USER.turn -> {
                 val cards = Decks.USER.deck.mapIndexed { index, card -> "${index + 1})$card" }
                     .joinToString(" ")
                 println("Cards in hand: $cards")
-                putCard(Move.USER)
+                putCard(Players.USER)
             }
-            Move.COMPUTER.turn -> putCard(Move.COMPUTER)
+            Players.COMPUTER.turn -> putCard(Players.COMPUTER)
         }
 
         if (
@@ -108,6 +108,22 @@ private fun game() {
             gameOver()
         }
     }
+}
+
+fun showStatistic(card: Card) {
+    val scores = mutableMapOf(Players.USER to 0, Players.COMPUTER to 0)
+    val cards = mutableMapOf(Players.USER to 0, Players.COMPUTER to 0)
+
+    val player = if (card == Decks.DECK.deck.last()) Players.USER else Players.COMPUTER
+
+    scores[player]?.plus(1)
+
+
+    println(
+        """
+        Score: Player ${scores[Players.USER]} - Computer ${scores[Players.COMPUTER]}
+        Cards: Player ${cards[Players.USER]} - Computer ${cards[Players.COMPUTER]}""".trimIndent()
+    )
 }
 
 private fun dealCards() {
@@ -125,24 +141,25 @@ private fun dealCards() {
     Decks.DECK.deck.removeAll(Decks.USER.deck)
 }
 
-private fun putCard(player: Move) {
+private fun putCard(player: Players) {
     val card: Card
     val sizeDeck = Decks.USER.deck.size
 
     fun put(decks: Decks, card: Card) {
+        showStatistic(card)
         // Put card on table and remove from deck
         Decks.TABLE.deck.add(Decks.TABLE.deck.size, card)
         decks.deck.remove(card)
 
         // Change players turn
-        Move.USER.turn = true
-        Move.COMPUTER.turn = true
+        Players.USER.turn = true
+        Players.COMPUTER.turn = true
         player.turn = false
     }
 
     when (player) {
         // when user move
-        Move.USER -> {
+        Players.USER -> {
             // output cards in hand user
             println("Choose a card to play (1-$sizeDeck):")
 
@@ -159,18 +176,20 @@ private fun putCard(player: Move) {
             }
         }
         // when computer move
-        Move.COMPUTER -> {
+        Players.COMPUTER -> {
             card = Decks.COMPUTER.deck.first()
             println("Computer plays $card")
             put(Decks.COMPUTER, card)
         }
     }
+
+
 }
 
 fun gameOver() {
 //    Turn off options to move for player and computer
-    Move.USER.turn = false
-    Move.COMPUTER.turn = false
+    Players.USER.turn = false
+    Players.COMPUTER.turn = false
 
     println("Game Over")
 }

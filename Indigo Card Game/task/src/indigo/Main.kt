@@ -34,9 +34,9 @@ enum class Decks(var deck: MutableList<Card>) {
     COMPUTER(mutableListOf())
 }
 
-enum class Players(var turn: Boolean, var win: Boolean) {
-    USER(false, false),
-    COMPUTER(false, false)
+enum class Players(var turn: Boolean, var score: Int, var cards: Int) {
+    USER(false, 0, 0),
+    COMPUTER(false, 0, 0)
 }
 
 fun main() {
@@ -79,7 +79,9 @@ private fun startGame() {
 }
 
 private fun game() {
-    fun messageText() =
+    fun messageText() = if (Decks.TABLE.deck.isEmpty())
+        println("No cards on the table")
+    else
         println("\n${Decks.TABLE.deck.size} cards on the table, and the top card is ${Decks.TABLE.deck.last()}")
 
 //    Game continues while players have a turn
@@ -110,20 +112,25 @@ private fun game() {
     }
 }
 
-fun showStatistic(card: Card) {
-    val scores = mutableMapOf(Players.USER to 0, Players.COMPUTER to 0)
-    val cards = mutableMapOf(Players.USER to 0, Players.COMPUTER to 0)
+fun statistic(card: Card) {
+    val cardOnTable = Decks.DECK.deck.last()
 
-    val player = if (card == Decks.DECK.deck.last()) Players.USER else Players.COMPUTER
+    if (card.rank == cardOnTable.rank || card.suit == cardOnTable.suit) {
 
-    scores[player]?.plus(1)
+        if (Players.USER.turn) {
+            println("Player wins cards")
+            Players.USER.score += 1
+            Players.USER.cards += Decks.TABLE.deck.size
+        } else if (Players.COMPUTER.turn) {
+            println("Computer wins cards")
+            Players.COMPUTER.score += 1
+            Players.COMPUTER.cards += Decks.TABLE.deck.size
+        }
+        Decks.TABLE.deck.clear()
 
-
-    println(
-        """
-        Score: Player ${scores[Players.USER]} - Computer ${scores[Players.COMPUTER]}
-        Cards: Player ${cards[Players.USER]} - Computer ${cards[Players.COMPUTER]}""".trimIndent()
-    )
+        println("Score: Player ${Players.USER.score} - Computer ${Players.COMPUTER.score}")
+        println("Cards: Player ${Players.USER.cards} - Computer ${Players.COMPUTER.cards}")
+    }
 }
 
 private fun dealCards() {
@@ -146,10 +153,13 @@ private fun putCard(player: Players) {
     val sizeDeck = Decks.USER.deck.size
 
     fun put(decks: Decks, card: Card) {
-        showStatistic(card)
-        // Put card on table and remove from deck
+
+        // Put card on table and remove card from deck
         Decks.TABLE.deck.add(Decks.TABLE.deck.size, card)
         decks.deck.remove(card)
+
+        statistic(card)
+
 
         // Change players turn
         Players.USER.turn = true

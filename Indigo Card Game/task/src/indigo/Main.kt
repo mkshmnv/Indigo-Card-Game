@@ -109,13 +109,13 @@ private fun game() {
 
         when {
             Players.PLAYER.value.turn -> {
-                val cards = Players.PLAYER.value.deck.mapIndexed { index, card -> "${index + 1})$card" }.joinToString(" ")
+                val cards =
+                    Players.PLAYER.value.deck.mapIndexed { index, card -> "${index + 1})$card" }
+                        .joinToString(" ")
                 println("Cards in hand: $cards")
                 move(Players.PLAYER)
             }
             Players.COMPUTER.value.turn -> {
-                if ()
-                val candidateCards =
                 move(Players.COMPUTER)
             }
         }
@@ -131,7 +131,6 @@ private fun game() {
         }
     }
 }
-
 
 
 private fun dealCards() {
@@ -172,7 +171,7 @@ private fun move(currentPlayer: Players) {
         // Put card on table and remove card from deck
         statistic()
 
-        tableCards.add(tableCards.size, playingCard)
+        tableCards.add(playingCard)
         currentPlayerValues.deck.remove(playingCard)
 
         // Change players turn
@@ -201,7 +200,57 @@ private fun move(currentPlayer: Players) {
         }
         // when computer move
         Players.COMPUTER -> {
-            playingCard = currentPlayerValues.deck.first()
+//            playingCard = currentPlayerValues.deck.first() // TODO REMOVE THIS
+
+            val candidateCards = currentPlayerValues.deck.filter { card ->
+                card.rank == tableCards.last().rank ||
+                card.suit == tableCards.last().suit
+            }
+
+            // for steps 3 and 4
+            val cardsSameSuits = if (candidateCards.isEmpty()) {
+                currentPlayerValues.deck.groupBy { it.suit }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
+            } else {
+                candidateCards.groupBy { it.suit }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
+            }
+
+            val cardsSameRanks = if (candidateCards.isEmpty()) {
+                currentPlayerValues.deck.groupBy { it.rank }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
+            } else {
+                candidateCards.groupBy { it.rank }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
+            }
+
+            playingCard = when {
+                // 3) If there are no cards on the table
+                // 4) If there are cards on the table but no candidate cards, use the same tactics as in step 3
+                tableCards.isEmpty() -> when {
+                    // If there are cards in hand with the same suit, throw one of them at random
+                    cardsSameSuits.isNotEmpty() -> cardsSameSuits.random()
+                    // If there are no cards in hand with the same suit, but there are cards with the same rank, then throw one of them at random
+                    cardsSameRanks.isNotEmpty() -> cardsSameRanks.random()
+                    // If there are no cards in hand with the same suit or rank, throw any card at random.
+                    else -> currentPlayerValues.deck.random()
+                }
+
+                // 1) If there is only one card in hand, put it on the table
+                currentPlayerValues.deck.size == 1 -> currentPlayerValues.deck.first()
+
+                // 2) If there is only one candidate card, put it on the table
+                candidateCards.size == 1 -> candidateCards.first()
+
+                // 5) If there are two or more candidate cards
+                else -> {
+                    when {
+                        // If there are 2 or more candidate cards with the same suit as the top card on the table, throw one of them at random
+                        cardsSameSuits.size >= 2 -> cardsSameSuits.random()
+                        // If the above isn't applicable, but there are 2 or more candidate cards with the same rank as the top card on the table, throw one of them at random
+                        cardsSameRanks.size >= 2 -> cardsSameRanks.random()
+                        // If nothing of the above is applicable, then throw any of the candidate cards at random.
+                        else -> candidateCards.random()
+                    }
+                }
+            }
+
             println("Computer plays $playingCard")
             putCard()
         }

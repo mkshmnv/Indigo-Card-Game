@@ -1,7 +1,5 @@
 package indigo
 
-import kotlin.system.exitProcess
-
 enum class Suits(val symbol: String) {
     SPADES("♠"),
     HEARD("♥"),
@@ -42,14 +40,18 @@ enum class Players(var value: Player) {
 class Player(val name: String) {
     var firstTurn: Boolean = false
     var turn: Boolean = false
-    var lastWinner: Boolean = false
     var deck: MutableList<Card> = mutableListOf()
     var score: Int = 0
     var winsCards: MutableList<Card> = mutableListOf()
+
+    fun getStatistic() {
+        println("Score: Player ${Players.PLAYER.value.score} - Computer ${Players.COMPUTER.value.score}")
+        println("Cards: Player ${Players.PLAYER.value.winsCards.size} - Computer ${Players.COMPUTER.value.winsCards.size}")
+    }
 }
 
 fun main() {
-    // Start the game0
+    // Start the game
     startGame()
 
     // Main game
@@ -66,12 +68,10 @@ private fun startGame() {
             "yes" -> {
                 Players.PLAYER.value.firstTurn = true
                 Players.PLAYER.value.turn = true
-                Players.PLAYER.value.lastWinner = true
             }
             "no" -> {
                 Players.COMPUTER.value.firstTurn = true
                 Players.COMPUTER.value.turn = true
-                Players.COMPUTER.value.lastWinner = true
             }
         }
     }
@@ -84,7 +84,6 @@ private fun startGame() {
     }
     Deck.GAME_DECK.cards.shuffle()
 
-    // RULES - Four cards are placed face-up on the table
     Deck.TABLE_DECK.cards = Deck.GAME_DECK.cards.subList(0, 4)
     println("Initial cards on the table: ${Deck.TABLE_DECK.cards.joinToString(" ")}")
 
@@ -92,35 +91,38 @@ private fun startGame() {
     val temp = Deck.GAME_DECK.cards.filter { it !in Deck.TABLE_DECK.cards }.toMutableList()
     Deck.GAME_DECK.cards = temp
 
-    // RULES - Six cards are dealt to each player;
+//    Hand out cards to players
     dealCards()
 }
 
 private fun game() {
+    fun messageText() = if (Deck.TABLE_DECK.cards.isEmpty())
+        println("No cards on the table")
+    else
+        println("\n${Deck.TABLE_DECK.cards.size} cards on the table, and the top card is ${Deck.TABLE_DECK.cards.last()}")
 
-//    The players take turns in playing cards.
+//    Game continues while players have a turn
     while (Players.PLAYER.value.turn || Players.COMPUTER.value.turn) {
-
-        if (Players.PLAYER.value.deck.size + Players.COMPUTER.value.deck.size == 52) gameOver()
-
-        // RULES - When both players have no cards in hand, deal cards.
-        if (Players.PLAYER.value.deck.isEmpty() && Players.COMPUTER.value.deck.isEmpty()) dealCards()
-
         messageText()
+
+        if (Players.PLAYER.value.deck.isEmpty() && Players.COMPUTER.value.deck.isEmpty()) dealCards()
 
         when {
             Players.PLAYER.value.turn -> {
-                val cards =
-                    Players.PLAYER.value.deck.mapIndexed { index, card -> "${index + 1})$card" }
-                        .joinToString(" ")
+                val cards = Players.PLAYER.value.deck.mapIndexed { index, card -> "${index + 1})$card" }.joinToString(" ")
                 println("Cards in hand: $cards")
                 move(Players.PLAYER)
             }
-            Players.COMPUTER.value.turn -> move(Players.COMPUTER)
+            Players.COMPUTER.value.turn -> {
+                if ()
+                val candidateCards =
+                move(Players.COMPUTER)
+            }
         }
 
         if (
             Deck.GAME_DECK.cards.isEmpty() &&
+            Deck.TABLE_DECK.cards.size == 52 &&
             Players.PLAYER.value.deck.isEmpty() &&
             Players.COMPUTER.value.deck.isEmpty()
         ) {
@@ -129,6 +131,7 @@ private fun game() {
         }
     }
 }
+
 
 
 private fun dealCards() {
@@ -142,65 +145,45 @@ private fun dealCards() {
     }
 
     // Remove cards from deck
-    Deck.GAME_DECK.cards.removeAll(Players.COMPUTER.value.deck + Players.PLAYER.value.deck)
+    Deck.GAME_DECK.cards.removeAll(Players.COMPUTER.value.deck)
+    Deck.GAME_DECK.cards.removeAll(Players.PLAYER.value.deck)
 }
 
 private fun move(currentPlayer: Players) {
     val currentPlayerValues = currentPlayer.value
-    val playerValue = Players.PLAYER.value
-    val computerValue = Players.COMPUTER.value
-
     val tableCards = Deck.TABLE_DECK.cards
 
     lateinit var playingCard: Card
+    val cardOnTable = Deck.GAME_DECK.cards.last()
+
+    fun statistic() {
+        if (playingCard.rank == cardOnTable.rank || playingCard.suit == cardOnTable.suit) {
+            println("${currentPlayerValues.name} wins cards")
+            currentPlayerValues.score += 1
+            currentPlayerValues.winsCards.addAll(tableCards)
+
+            tableCards.clear()
+
+            currentPlayerValues.getStatistic()
+        }
+    }
 
     fun putCard() {
+        // Put card on table and remove card from deck
+        statistic()
 
+        tableCards.add(tableCards.size, playingCard)
         currentPlayerValues.deck.remove(playingCard)
 
-        // RULES - If the card has the same suit or rank as the topmost card, then the player wins all the cards on the table;
-        if (tableCards.isNotEmpty()) {
-            if (playingCard.rank == tableCards.last().rank || playingCard.suit == tableCards.last().suit) {
-
-                tableCards.add(tableCards.size, playingCard)
-                currentPlayerValues.winsCards.addAll(tableCards)
-                tableCards.clear()
-
-                println("${currentPlayerValues.name} wins cards")
-
-                currentPlayerValues.score = currentPlayerValues.winsCards.filter {
-                    it.rank in listOf(
-                        Ranks.ACE,
-                        Ranks.TEN,
-                        Ranks.JACK,
-                        Ranks.QUEEN,
-                        Ranks.KING
-                    )
-                }.size
-
-                statistic()
-
-                playerValue.lastWinner = false
-                computerValue.lastWinner = false
-                currentPlayerValues.lastWinner = true
-
-            } else {
-                tableCards.add(playingCard)
-            }
-        } else {
-            tableCards.add(playingCard)
-        }
-
         // Change players turn
-        playerValue.turn = true
-        computerValue.turn = true
+        Players.PLAYER.value.turn = true
+        Players.COMPUTER.value.turn = true
         currentPlayerValues.turn = false
     }
 
     when (currentPlayer) {
         // when user move
         Players.PLAYER -> {
-
             // output cards in hand user
             println("Choose a card to play (1-${currentPlayerValues.deck.size}):")
 
@@ -211,8 +194,7 @@ private fun move(currentPlayer: Players) {
                     putCard()
                 }
                 "exit" -> {
-                    println("Game Over")
-                    exitProcess(0)
+                    gameOver()
                 }
                 else -> move(currentPlayer)
             }
@@ -227,50 +209,11 @@ private fun move(currentPlayer: Players) {
 }
 
 fun gameOver() {
-    val player = Players.PLAYER.value
-    val computer = Players.COMPUTER.value
-    val lastWinner = if (player.lastWinner) player else computer
-    lastWinner.winsCards.addAll(Deck.TABLE_DECK.cards)
-
-    fun calcScore(player: Player) : Int {
-        return player.winsCards.filter {
-            it.rank in listOf(
-                Ranks.ACE,
-                Ranks.TEN,
-                Ranks.JACK,
-                Ranks.QUEEN,
-                Ranks.KING
-            )
-        }.size
-    }
-    player.score = calcScore(player)
-    computer.score = calcScore(computer)
-
-    if (player.score > computer.score) player.score += 3
-    if (player.score < computer.score) computer.score += 3
-
-    statistic()
+//    Turn off options to move for player and computer
+    Players.PLAYER.value.turn = false
+    Players.COMPUTER.value.turn = false
 
     println("Game Over")
-    exitProcess(0)
 }
 
-fun statistic() {
-    val player = Players.PLAYER.value
-    val computer = Players.COMPUTER.value
-
-    println(
-        """
-           Score: ${player.name} ${player.score} - ${computer.name} ${computer.score}
-           Cards: ${player.name} ${player.winsCards.size} - ${computer.name} ${computer.winsCards.size}
-        """.trimIndent()
-    )
-}
-
-fun messageText() = println(
-    if (Deck.TABLE_DECK.cards.isEmpty())
-        "\nNo cards on the table"
-    else
-        "\n${Deck.TABLE_DECK.cards.size} cards on the table, and the top card is ${Deck.TABLE_DECK.cards.last()}"
-)
 

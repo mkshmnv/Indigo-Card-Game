@@ -1,4 +1,4 @@
-package indigo
+//package indigo
 
 enum class Suits(val symbol: String) {
     SPADES("♠"),
@@ -201,25 +201,30 @@ private fun move(currentPlayer: Players) {
         // when computer move
         Players.COMPUTER -> {
 //            playingCard = currentPlayerValues.deck.first() // TODO REMOVE THIS
+            var candidateCards = listOf<Card>()
+            var cardsSameSuits = listOf<Card>()
+            var cardsSameRanks = listOf<Card>()
 
-            val candidateCards = currentPlayerValues.deck.filter { card ->
-                card.rank == tableCards.last().rank ||
-                card.suit == tableCards.last().suit
+            if (currentPlayerValues.deck.filter { card ->
+                    card.rank == tableCards.last().rank ||
+                    card.suit == tableCards.last().suit
+                }.isEmpty()
+            ) {
+                candidateCards = currentPlayerValues.deck
+            } else {
+                candidateCards = currentPlayerValues.deck.filter { card ->
+                    card.rank != tableCards.last().rank ||
+                    card.suit != tableCards.last().suit
+                }
+
+                if (candidateCards.groupBy { it.suit }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }.isNotEmpty())
+                    cardsSameSuits = candidateCards.groupBy { it.suit }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
+
+                if (candidateCards.groupBy { it.rank }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }.isNotEmpty())
+                    cardsSameRanks = candidateCards.groupBy { it.rank }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
             }
 
             // for steps 3 and 4
-            val cardsSameSuits = if (candidateCards.isEmpty()) {
-                currentPlayerValues.deck.groupBy { it.suit }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
-            } else {
-                candidateCards.groupBy { it.suit }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
-            }
-
-            val cardsSameRanks = if (candidateCards.isEmpty()) {
-                currentPlayerValues.deck.groupBy { it.rank }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
-            } else {
-                candidateCards.groupBy { it.rank }.filter { it.value.size > 1 }.values.reduce { acc, cards -> acc + cards }
-            }
-
             playingCard = when {
                 // 3) If there are no cards on the table
                 // 4) If there are cards on the table but no candidate cards, use the same tactics as in step 3

@@ -43,11 +43,6 @@ class Player(val name: String) {
     var deck: MutableList<Card> = mutableListOf()
     var score: Int = 0
     var winsCards: MutableList<Card> = mutableListOf()
-
-    fun getStatistic() {
-        println("Score: Player ${Players.PLAYER.value.score} - Computer ${Players.COMPUTER.value.score}")
-        println("Cards: Player ${Players.PLAYER.value.winsCards.size} - Computer ${Players.COMPUTER.value.winsCards.size}")
-    }
 }
 
 fun main() {
@@ -151,27 +146,32 @@ private fun dealCards() {
 private fun move(currentPlayer: Players) {
     val currentPlayerValues = currentPlayer.value
     val tableCards = Deck.TABLE_DECK.cards
+    val topCardOnTable = tableCards.last()
 
     lateinit var playingCard: Card
-    val cardOnTable = Deck.GAME_DECK.cards.last()
 
-    fun statistic() {
-        if (playingCard.rank == cardOnTable.rank || playingCard.suit == cardOnTable.suit) {
+    fun putCard(playingCard: Card) {
+
+        // If current player win
+        if (playingCard.rank == topCardOnTable.rank || playingCard.suit == topCardOnTable.suit) {
             println("${currentPlayerValues.name} wins cards")
-            currentPlayerValues.score += 1
-            currentPlayerValues.winsCards.addAll(tableCards)
 
+            // Update scores current winner
+            currentPlayerValues.score += 1
+
+            // Update winners deck card current winner
+            currentPlayerValues.winsCards.addAll(tableCards + playingCard)
             tableCards.clear()
 
-            currentPlayerValues.getStatistic()
+            // Print statistic
+            println("Score: Player ${Players.PLAYER.value.score} - Computer ${Players.COMPUTER.value.score}")
+            println("Cards: Player ${Players.PLAYER.value.winsCards.size} - Computer ${Players.COMPUTER.value.winsCards.size}")
+        } else {
+            // Put card on table
+            tableCards.add(playingCard)
         }
-    }
 
-    fun putCard() {
-        // Put card on table and remove card from deck
-        statistic()
-
-        tableCards.add(playingCard)
+        // Remove playing card from deck current player
         currentPlayerValues.deck.remove(playingCard)
 
         // Change players turn
@@ -190,7 +190,7 @@ private fun move(currentPlayer: Players) {
             when (val choice = readln()) {
                 in (1..currentPlayerValues.deck.size).map { it.toString() } -> {
                     playingCard = currentPlayerValues.deck[choice.toInt() - 1]
-                    putCard()
+                    putCard(playingCard)
                 }
                 "exit" -> {
                     gameOver()
@@ -201,7 +201,7 @@ private fun move(currentPlayer: Players) {
         // when computer move
         Players.COMPUTER -> {
 //            playingCard = currentPlayerValues.deck.first() // TODO REMOVE THIS
-            var candidateCards = listOf<Card>()
+            val candidateCards: List<Card>
             var cardsSameSuits = listOf<Card>()
             var cardsSameRanks = listOf<Card>()
 
@@ -257,7 +257,7 @@ private fun move(currentPlayer: Players) {
             }
 
             println("Computer plays $playingCard")
-            putCard()
+            putCard(playingCard)
         }
     }
 }
